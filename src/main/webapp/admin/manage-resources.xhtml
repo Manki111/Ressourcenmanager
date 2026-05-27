@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="../WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="content">
+        <h2>Ressourcenverwaltung</h2>
+
+        <h:messages globalOnly="true" styleClass="info-box" redisplay="false"/>
+
+        <h3>Neue Ressource anlegen</h3>
+
+        <h:form id="newResourceForm">
+            <h:panelGrid columns="2">
+
+                <h:outputLabel for="resName" value="Name *"/>
+                <h:panelGroup>
+                    <h:inputText id="resName"
+                                 value="#{resourceController.newResource.name}"
+                                 required="true"
+                                 requiredMessage="Bitte einen Namen eingeben."/>
+                    <h:message for="resName" styleClass="field-error"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="resType" value="Typ *"/>
+                <h:panelGroup>
+                    <h:selectOneMenu id="resType"
+                                     value="#{resourceController.newResource.type}"
+                                     required="true"
+                                     requiredMessage="Bitte einen Typ auswählen.">
+                        <f:selectItem itemLabel="– Bitte auswählen –" itemValue="#{null}"
+                                      noSelectionOption="true"/>
+                        <f:selectItems value="#{resourceController.availableTypes}"
+                                       var="t"
+                                       itemValue="#{t}"
+                                       itemLabel="#{t == 'RAUM' ? 'Raum' : 'Sitzplatz'}"/>
+                    </h:selectOneMenu>
+                    <h:message for="resType" styleClass="field-error"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="resCapacity" value="Kapazität *"/>
+                <h:panelGroup>
+                    <h:inputText id="resCapacity"
+                                 value="#{resourceController.newResource.capacity}"
+                                 required="true"
+                                 requiredMessage="Bitte die Kapazität eingeben."
+                                 converterMessage="Bitte eine ganze Zahl eingeben.">
+                        <f:convertNumber integerOnly="true"/>
+                        <f:validateLongRange minimum="1" maximum="50"/>
+                    </h:inputText>
+                    <h:message for="resCapacity" styleClass="field-error"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="resLocation" value="Standort / Etage"/>
+                <h:panelGroup>
+                    <h:inputText id="resLocation"
+                                 value="#{resourceController.newResource.location}"/>
+                    <h:message for="resLocation" styleClass="field-error"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="resDescription" value="Beschreibung"/>
+                <h:panelGroup>
+                    <h:inputTextarea id="resDescription"
+                                     value="#{resourceController.newResource.description}"
+                                     rows="3"/>
+                    <h:message for="resDescription" styleClass="field-error"/>
+                </h:panelGroup>
+
+            </h:panelGrid>
+
+            <br/>
+            <h:commandButton id="saveResource" value="Ressource anlegen"
+                             action="#{resourceController.saveNewResource}"/>
+        </h:form>
+
+        <div class="divider"/>
+
+        <h3>Alle Ressourcen</h3>
+
+        <h:dataTable styleClass="event-table"
+                     id="resourcesTable"
+                     value="#{resourceController.resources}"
+                     var="res">
+
+            <h:column>
+                <f:facet name="header">Typ</f:facet>
+                <span class="badge badge-#{res.type == 'RAUM' ? 'raum' : 'sitzplatz'}">
+                    #{res.typeLabel}
+                </span>
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Name</f:facet>
+                #{res.name}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Standort</f:facet>
+                #{res.location}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Kapazität</f:facet>
+                #{res.capacity}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Status</f:facet>
+                <h:outputText value="Aktiv"   rendered="#{res.active}" styleClass="success"/>
+                <h:outputText value="Inaktiv" rendered="#{not res.active}" styleClass="text-muted"/>
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Aktionen</f:facet>
+                <h:form rendered="#{res.active}">
+                    <h:commandButton value="Bearbeiten"
+                                     styleClass="btn-secondary"
+                                     action="#{resourceController.prepareEdit(res)}"/>
+                    &#160;
+                    <h:commandButton value="Deaktivieren"
+                                     styleClass="btn-danger"
+                                     action="#{resourceController.deleteResource(res.id)}"
+                                     onclick="return confirm('Ressource wirklich deaktivieren? Bestehende Buchungen bleiben erhalten.')"/>
+                </h:form>
+                <h:form rendered="#{not res.active}">
+                    <h:commandButton value="Aktivieren"
+                                     styleClass="btn-secondary"
+                                     action="#{resourceController.activateResource(res.id)}"/>
+                    &#160;
+                </h:form>
+                <h:form>
+                    <h:commandButton value="Endgültig löschen"
+                                     styleClass="btn-danger"
+                                     action="#{resourceController.hardDeleteResource(res.id)}"
+                                     onclick="return confirm('Ressource ENDGÜLTIG löschen? Alle zugehörigen Buchungen werden ebenfalls unwiderruflich entfernt!')"/>
+                </h:form>
+            </h:column>
+
+        </h:dataTable>
+
+        <h:panelGroup rendered="#{resourceController.selectedResource != null}">
+            <div class="divider"/>
+            <h3>Ressource bearbeiten: #{resourceController.selectedResource.name}</h3>
+
+            <h:form id="editResourceForm">
+                <h:panelGrid columns="2">
+
+                    <h:outputLabel for="editName" value="Name *"/>
+                    <h:panelGroup>
+                        <h:inputText id="editName"
+                                     value="#{resourceController.editResource.name}"
+                                     required="true"
+                                     requiredMessage="Bitte einen Namen eingeben."/>
+                        <h:message for="editName" styleClass="field-error"/>
+                    </h:panelGroup>
+
+                    <h:outputLabel for="editCapacity" value="Kapazität *"/>
+                    <h:panelGroup>
+                        <h:inputText id="editCapacity"
+                                     value="#{resourceController.editResource.capacity}"
+                                     required="true"
+                                     requiredMessage="Bitte die Kapazität eingeben."
+                                     converterMessage="Bitte eine ganze Zahl eingeben.">
+                            <f:convertNumber integerOnly="true"/>
+                            <f:validateLongRange minimum="1" maximum="50"/>
+                        </h:inputText>
+                        <h:message for="editCapacity" styleClass="field-error"/>
+                    </h:panelGroup>
+
+                    <h:outputLabel for="editLocation" value="Standort / Etage"/>
+                    <h:panelGroup>
+                        <h:inputText id="editLocation"
+                                     value="#{resourceController.editResource.location}"/>
+                    </h:panelGroup>
+
+                    <h:outputLabel for="editDescription" value="Beschreibung"/>
+                    <h:panelGroup>
+                        <h:inputTextarea id="editDescription"
+                                         value="#{resourceController.editResource.description}"
+                                         rows="3"/>
+                    </h:panelGroup>
+
+                </h:panelGrid>
+
+                <br/>
+                <h:commandButton value="Änderungen speichern"
+                                 action="#{resourceController.saveEdit}"/>
+            </h:form>
+        </h:panelGroup>
+
+    </ui:define>
+
+</ui:composition>
+</html>

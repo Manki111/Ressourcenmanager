@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="../WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="content">
+        <h2>Alle Buchungen (Admin)</h2>
+
+        <h:messages globalOnly="true" styleClass="info-box" redisplay="false"/>
+
+        <h:panelGroup rendered="#{adminBookingController.hasBookings()}">
+            <h:dataTable styleClass="event-table"
+                         id="allBookingsTable"
+                         value="#{adminBookingController.allBookings}"
+                         var="booking">
+
+                <h:column>
+                    <f:facet name="header">Mitarbeiter</f:facet>
+                    #{booking.user.firstName} #{booking.user.lastName}
+                    <br/>
+                    <span class="text-muted">#{booking.user.username}</span>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Ressource</f:facet>
+                    <span class="badge badge-#{booking.resource.type == 'RAUM' ? 'raum' : 'sitzplatz'}">
+                        #{booking.resource.typeLabel}
+                    </span>
+                    #{booking.resource.name}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Standort</f:facet>
+                    #{booking.resource.location}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Startzeit</f:facet>
+                    <h:outputText value="#{booking.startTime}">
+                        <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm"/>
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Endzeit</f:facet>
+                    <h:outputText value="#{booking.endTime}">
+                        <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm"/>
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Zweck</f:facet>
+                    #{booking.purpose}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Erstellt am</f:facet>
+                    <h:outputText value="#{booking.createdAt}">
+                        <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm"/>
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Status</f:facet>
+                    <span class="badge badge-#{booking.status == 'AKTIV' ? 'aktiv' : 'storniert'}">
+                        #{booking.status}
+                    </span>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Aktion</f:facet>
+                    <h:form rendered="#{booking.active}">
+                        <h:commandButton value="Stornieren"
+                                         styleClass="btn-danger"
+                                         action="#{adminBookingController.cancelBooking(booking.id)}"
+                                         onclick="return confirm('Diese Buchung wirklich stornieren?')"/>
+                    </h:form>
+
+                </h:column>
+
+            </h:dataTable>
+        </h:panelGroup>
+
+        <h:outputText value="Es sind noch keine Buchungen vorhanden."
+                      rendered="#{not adminBookingController.hasBookings()}"
+                      styleClass="text-muted"/>
+
+    </ui:define>
+
+</ui:composition>
+</html>

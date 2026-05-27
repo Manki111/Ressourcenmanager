@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="content">
+
+        <h2>Buchung erstellen</h2>
+
+        <h:messages globalOnly="true" styleClass="info-box" redisplay="false"/>
+
+        <h:form id="bookingForm">
+            <h:panelGrid id="bookingGrid" columns="2">
+
+                <h:outputLabel for="resource" value="Ressource *"/>
+                <h:panelGroup id="resourceGroup">
+                    <h:selectOneMenu id="resource"
+                                     value="#{bookingController.newBooking.resourceId}"
+                                     required="true"
+                                     requiredMessage="Bitte eine Ressource auswählen.">
+                        <f:selectItem itemLabel="– Bitte auswählen –" itemValue="#{null}"
+                                      noSelectionOption="true"/>
+                        <f:selectItems value="#{bookingController.availableResources}"
+                                       var="res"
+                                       itemValue="#{res.id}"
+                                       itemLabel="[#{res.typeLabel}] #{res.name} – #{res.location} (Kapazität: #{res.capacity})"/>
+                    </h:selectOneMenu>
+                    <h:message for="resource" styleClass="field-error"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="startTime" value="Startzeit *"/>
+                <h:panelGroup id="startTimeGroup">
+                    <h:inputText id="startTime"
+                                 value="#{bookingController.newBooking.startTime}"
+                                 required="true"
+                                 requiredMessage="Bitte die Startzeit eingeben."
+                                 pt:type="datetime-local">
+                        <f:convertDateTime type="localDateTime" pattern="yyyy-MM-dd'T'HH:mm"/>
+                    </h:inputText>
+                    <h:message for="startTime" styleClass="field-error"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="endTime" value="Endzeit *"/>
+                <h:panelGroup id="endTimeGroup">
+                    <h:inputText id="endTime"
+                                 value="#{bookingController.newBooking.endTime}"
+                                 required="true"
+                                 requiredMessage="Bitte die Endzeit eingeben."
+                                 pt:type="datetime-local">
+                        <f:convertDateTime type="localDateTime" pattern="yyyy-MM-dd'T'HH:mm"/>
+                    </h:inputText>
+                    <h:message for="endTime" styleClass="field-error"/>
+                </h:panelGroup>
+
+                <h:outputLabel for="purpose" value="Zweck / Bemerkung"/>
+                <h:panelGroup id="purposeGroup">
+                    <h:inputTextarea id="purpose"
+                                     value="#{bookingController.newBooking.purpose}"
+                                     rows="3"
+                                     cols="40"/>
+                    <h:message for="purpose" styleClass="field-error"/>
+                </h:panelGroup>
+
+            </h:panelGrid>
+
+            <br/>
+
+            <h:commandButton id="checkAvailability"
+                             value="Verfügbarkeit prüfen"
+                             action="#{bookingController.checkAvailability}"
+                             styleClass="btn-secondary"
+                             immediate="false"/>
+            &#160;
+
+            <h:commandButton id="saveBooking"
+                             value="Buchung speichern"
+                             action="#{bookingController.saveBooking}"/>
+
+            <h:panelGroup rendered="#{bookingController.conflictChecked}">
+                <br/><br/>
+                <h:panelGroup rendered="#{bookingController.conflictFound}">
+                    <div class="warn-box">
+                        <strong>&#10060; Zeitraum belegt:</strong>
+                        Die gewählte Ressource ist im angegebenen Zeitraum bereits gebucht.
+                        Bitte wählen Sie einen anderen Zeitraum oder eine andere Ressource.
+                    </div>
+                </h:panelGroup>
+                <h:panelGroup rendered="#{not bookingController.conflictFound}">
+                    <div class="info-box">
+                        <strong>&#10003; Verfügbar:</strong>
+                        Die Ressource ist im gewählten Zeitraum frei. Sie können jetzt buchen.
+                    </div>
+                </h:panelGroup>
+            </h:panelGroup>
+
+        </h:form>
+
+        <div class="divider"/>
+
+        <h2>Meine Buchungen</h2>
+
+        <h:panelGroup rendered="#{bookingController.hasMyBookings()}">
+            <h:dataTable styleClass="event-table"
+                         id="myBookingsTable"
+                         value="#{bookingController.myBookings}"
+                         var="booking">
+
+                <h:column>
+                    <f:facet name="header">Ressource</f:facet>
+                    <span class="badge badge-#{booking.resource.type == 'RAUM' ? 'raum' : 'sitzplatz'}">
+                        #{booking.resource.typeLabel}
+                    </span>
+                    #{booking.resource.name}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Standort</f:facet>
+                    #{booking.resource.location}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Startzeit</f:facet>
+                    <h:outputText value="#{booking.startTime}">
+                        <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm"/>
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Endzeit</f:facet>
+                    <h:outputText value="#{booking.endTime}">
+                        <f:convertDateTime type="localDateTime" pattern="dd.MM.yyyy HH:mm"/>
+                    </h:outputText>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Zweck</f:facet>
+                    #{booking.purpose}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Status</f:facet>
+                    <span class="badge badge-#{booking.status == 'AKTIV' ? 'aktiv' : 'storniert'}">
+                        #{booking.status}
+                    </span>
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Aktion</f:facet>
+                    <h:form rendered="#{booking.active}">
+                        <h:commandButton value="Stornieren"
+                                         styleClass="btn-danger"
+                                         action="#{bookingController.cancelBooking(booking.id)}"
+                                         onclick="return confirm('Buchung wirklich stornieren?')"/>
+                    </h:form>
+                    <h:outputText value="–" rendered="#{not booking.active}"/>
+                </h:column>
+
+            </h:dataTable>
+        </h:panelGroup>
+
+        <h:outputText value="Sie haben noch keine Buchungen."
+                      rendered="#{not bookingController.hasMyBookings()}"
+                      styleClass="text-muted"/>
+
+    </ui:define>
+
+</ui:composition>
+</html>

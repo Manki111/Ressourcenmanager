@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="content">
+        <h2>Büroauslastung der nächste 7 Tage</h2>
+
+        <p>Hier sehen Sie, wie viele Mitarbeiterinnen und Mitarbeiter in den nächsten Tagen
+           bereits Ressourcen gebucht haben. So können Sie besser entscheiden,
+           ob sich ein Bürotag lohnt oder Homeoffice sinnvoller ist.</p>
+
+        <h:dataTable styleClass="event-table"
+                     id="occupancyTable"
+                     value="#{occupancyController.occupancyDays}"
+                     var="day">
+
+            <h:column>
+                <f:facet name="header">Datum</f:facet>
+                <h:outputText value="#{day.date}">
+                    <f:convertDateTime type="localDate" pattern="EEE, dd.MM.yyyy"/>
+                </h:outputText>
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Gebuchte Mitarbeiter</f:facet>
+                #{day.bookedUsers}
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Auslastung</f:facet>
+                <span class="occupancy-#{day.occupancyLevel}">
+                    <h:outputText value="&#11044; leer"    rendered="#{day.occupancyLevel == 'leer'}"/>
+                    <h:outputText value="&#11044; gering"  rendered="#{day.occupancyLevel == 'gering'}"/>
+                    <h:outputText value="&#11044; mittel"  rendered="#{day.occupancyLevel == 'mittel'}"/>
+                    <h:outputText value="&#11044; hoch"    rendered="#{day.occupancyLevel == 'hoch'}"/>
+                </span>
+            </h:column>
+
+            <h:column>
+                <f:facet name="header">Empfehlung</f:facet>
+                <h:outputText value="Ideal für ein Bürotag!"
+                              rendered="#{day.occupancyLevel == 'gering' or day.occupancyLevel == 'leer'}"
+                              styleClass="success"/>
+                <h:outputText value="Normale Auslastung"
+                              rendered="#{day.occupancyLevel == 'mittel'}"/>
+                <h:outputText value="Hohes Aufkommen – ggf. Homeoffice"
+                              rendered="#{day.occupancyLevel == 'hoch'}"
+                              styleClass="text-muted"/>
+            </h:column>
+
+        </h:dataTable>
+
+        <div class="divider"/>
+        <h:button value="Buchung erstellen" outcome="/bookings.xhtml"/>
+    </ui:define>
+
+</ui:composition>
+</html>

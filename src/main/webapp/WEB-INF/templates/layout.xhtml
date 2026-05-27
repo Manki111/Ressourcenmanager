@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html">
+<h:head>
+    <title>Raum- und Sitzplatzbuchung</title>
+    <h:outputStylesheet library="css" name="style.css"/>
+</h:head>
+
+<h:body>
+    <h:messages id="messages" redisplay="false"/>
+
+    <header>
+        <h:graphicImage value="https://www.iu.de/logos/iu-logo.svg" width="150px"/>
+        <h1>Raum- &amp; Sitzplatzbuchung</h1>
+        <nav>
+            <h:link value="Start" outcome="/index.xhtml"/>
+            <h:panelGroup rendered="#{authController.loggedIn}">
+                |
+                <h:link value="Meine Buchungen" outcome="/bookings.xhtml"/>
+                |
+                <h:link value="Ressourcen" outcome="/resources.xhtml"/>
+                |
+                <h:link value="Auslastung" outcome="/occupancy.xhtml"/>
+                <h:panelGroup rendered="#{authController.admin}">
+                    |
+                    <h:link value="Admin: Ressourcen" outcome="/admin/manage-resources.xhtml"/>
+                    |
+                    <h:link value="Admin: Buchungen" outcome="/admin/all-bookings.xhtml"/>
+                </h:panelGroup>
+                |
+                <h:outputText value="Hallo #{authController.currentUser.name}!"/>
+                <h:form id="logoutForm" styleClass="nav-inline-form">
+                    <h:commandButton id="logout" value="Logout"
+                                     action="#{authController.logout}"
+                                     styleClass="nav-menu-button"/>
+                </h:form>
+            </h:panelGroup>
+            <h:panelGroup rendered="#{not authController.loggedIn}">
+                |
+                <h:link value="Login" outcome="/login.xhtml"/>
+                |
+                <h:link value="Registrieren" outcome="/register.xhtml"/>
+            </h:panelGroup>
+        </nav>
+    </header>
+
+    <main>
+        <ui:insert name="content"/>
+    </main>
+
+    <footer>
+        <p>DSBPIIJEE01 – Programmierung industrieller Informationssysteme mit Java EE – SoSe 2026</p>
+    </footer>
+
+</h:body>
+</html>

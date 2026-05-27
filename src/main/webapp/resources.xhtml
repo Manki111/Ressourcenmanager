@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:ui="jakarta.faces.facelets">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="content">
+        <h2>Verfügbare Ressourcen</h2>
+
+        <p class="text-muted">Hier sehen Sie alle buchbaren Räume und Sitzplätze.
+            Um eine Buchung vorzunehmen, gehen Sie zu
+            <h:link value="Meine Buchungen" outcome="/bookings.xhtml"/>.
+        </p>
+
+        <h3>Räume</h3>
+
+        <h:panelGroup rendered="#{not empty resourceController.rooms}">
+            <h:dataTable styleClass="event-table"
+                         id="roomsTable"
+                         value="#{resourceController.rooms}"
+                         var="res">
+
+                <h:column>
+                    <f:facet name="header">Name</f:facet>
+                    #{res.name}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Standort</f:facet>
+                    #{res.location}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Kapazität</f:facet>
+                    #{res.capacity} Personen
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Beschreibung</f:facet>
+                    #{res.description}
+                </h:column>
+
+            </h:dataTable>
+        </h:panelGroup>
+
+        <h:outputText value="Keine Räume vorhanden."
+                      rendered="#{empty resourceController.rooms}"
+                      styleClass="text-muted"/>
+
+        <h3>Sitzplätze</h3>
+
+        <h:panelGroup rendered="#{not empty resourceController.seats}">
+            <h:dataTable styleClass="event-table"
+                         id="seatsTable"
+                         value="#{resourceController.seats}"
+                         var="res">
+
+                <h:column>
+                    <f:facet name="header">Name</f:facet>
+                    #{res.name}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Standort</f:facet>
+                    #{res.location}
+                </h:column>
+
+                <h:column>
+                    <f:facet name="header">Beschreibung</f:facet>
+                    #{res.description}
+                </h:column>
+
+            </h:dataTable>
+        </h:panelGroup>
+
+        <h:outputText value="Keine Sitzplätze vorhanden."
+                      rendered="#{empty resourceController.seats}"
+                      styleClass="text-muted"/>
+
+        <div class="divider"/>
+        <h:button value="Buchung erstellen" outcome="/bookings.xhtml"/>
+    </ui:define>
+
+</ui:composition>
+</html>

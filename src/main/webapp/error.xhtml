@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="content">
+        <div class="warn-box">
+            <h2>Ein Fehler ist aufgetreten</h2>
+            <p>Mögliche Ursachen:</p>
+            <ul>
+                <li>Sie haben keine Berechtigung, diese Seite aufzurufen.</li>
+                <li>Die angeforderte Seite wurde nicht gefunden.</li>
+                <li>Ihre Anfrage konnte nicht verarbeitet werden.</li>
+            </ul>
+        </div>
+        <h:button value="Zur Startseite" outcome="/index.xhtml"/>
+    </ui:define>
+
+</ui:composition>
+</html>

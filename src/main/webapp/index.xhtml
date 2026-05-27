@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html">
+
+<ui:composition template="WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="content">
+        <h2>Willkommen im Buchungssystem</h2>
+
+        <div class="info-box">
+            <p>Mit diesem System können Mitarbeiterinnen und Mitarbeiter Räume und Sitzplätze für einen
+               bestimmten Zeitraum buchen. So lässt sich die Büroauslastung transparent planen.</p>
+        </div>
+
+        <h3>Was kann ich hier tun?</h3>
+        <ul>
+            <li>Räume und Sitzplätze für einen Zeitraum reservieren</li>
+            <li>Verfügbarkeit sofort prüfen</li>
+            <li>Eigene Buchungen einsehen und stornieren</li>
+            <li>Aktuelle Büroauslastung für die nächsten Tage einsehen</li>
+        </ul>
+
+        <h:panelGroup rendered="#{not authController.loggedIn}">
+            <div class="divider"/>
+            <h:button value="Jetzt anmelden" outcome="/login.xhtml"/>
+            &#160;
+            <h:button value="Registrieren" outcome="/register.xhtml" styleClass="btn-secondary"/>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{authController.loggedIn}">
+            <div class="divider"/>
+            <h:button value="Buchung erstellen" outcome="/bookings.xhtml"/>
+            &#160;
+            <h:button value="Auslastung ansehen" outcome="/occupancy.xhtml"/>
+        </h:panelGroup>
+    </ui:define>
+
+</ui:composition>
+</html>
